@@ -1,4 +1,4 @@
-package day5;
+package day.day5;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,8 +12,8 @@ public class Main {
     }
 
     private static void task1() {
-        String filePathPages = "/home/vboxuser/Desktop/AOC2024/Day1/src/day5/input-task-pages.txt";
-        String filePathUpdates = "/home/vboxuser/Desktop/AOC2024/Day1/src/day5/input-task-updates.txt";
+        String filePathPages = "/home/vboxuser/Desktop/AOC2024/Day1/src/day.day5/input-task-pages.txt";
+        String filePathUpdates = "/home/vboxuser/Desktop/AOC2024/Day1/src/day.day5/input-task-updates.txt";
         List<List<Integer>> pages = new ArrayList<>();
 
         try {
@@ -68,8 +68,8 @@ public class Main {
     }
 
     private static void task2() {
-        String filePathPages = "/home/vboxuser/Desktop/AOC2024/Day1/src/day5/input-task-pages.txt";
-        String filePathUpdates = "/home/vboxuser/Desktop/AOC2024/Day1/src/day5/input-task-updates.txt";
+        String filePathPages = "/home/vboxuser/Desktop/AOC2024/Day1/src/day.day5/input-task-pages.txt";
+        String filePathUpdates = "/home/vboxuser/Desktop/AOC2024/Day1/src/day.day5/input-task-updates.txt";
         List<List<Integer>> pages = new ArrayList<>();
 
         try {

@@ -1,4 +1,6 @@
-package day4;
+package day.day4;
+
+import day.DayUtils;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -12,8 +14,8 @@ public class Main {
     }
 
     private static void task2() {
-        String filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day4/input-task.txt";
-        char[][] grid = readGridFromFile(filePath);
+        String filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day.day4/input-task.txt";
+        char[][] grid = DayUtils.readGridFromFile(filePath);
         var result = 0;
         if (grid != null) {
             for (int i = 0; i < grid.length - 2; i++) {
@@ -42,8 +44,8 @@ public class Main {
     }
 
     private static void task1() {
-        String filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day4/input-task.txt";
-        char[][] grid = readGridFromFile(filePath);
+        String filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day.day4/input-task.txt";
+        char[][] grid = DayUtils.readGridFromFile(filePath);
 
         if (grid != null) {
             List<String> combinations = getFourLetterCombinations(grid);
@@ -54,35 +56,6 @@ public class Main {
 
             System.out.println(count);
         }
-    }
-
-    public static char[][] readGridFromFile(String filePath) {
-        List<String> lines = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                lines.add(line);
-            }
-        } catch (IOException e) {
-            System.err.println("Error reading file: " + e.getMessage());
-            return null;
-        }
-
-        // Convert the lines into a char[][] grid
-        int rows = lines.size();
-        if (rows == 0) return null;
-
-        int cols = lines.get(0).length();
-        char[][] grid = new char[rows][cols];
-
-        for (int i = 0; i < rows; i++) {
-            String line = lines.get(i);
-            for (int j = 0; j < cols; j++) {
-                grid[i][j] = line.charAt(j);
-            }
-        }
-
-        return grid;
     }
 
     public static List<String> getFourLetterCombinations(char[][] grid) {

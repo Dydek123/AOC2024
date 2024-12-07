@@ -1,7 +1,5 @@
-package day2;
+package day.day2;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +25,7 @@ public class Main {
 
     private static Integer processPart1Data() {
         // Specify the file path
-        String filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day2/input-test.txt";
+        String filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day.day2/input-test.txt";
 
         try {
             var loadData = Files.readAllLines(Path.of(filePath)).stream()
@@ -63,7 +61,7 @@ public class Main {
 
     private static Integer processPart2Data() {
         // Specify the file path
-        String filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day2/input-test.txt";
+        String filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day.day2/input-test.txt";
 
         try {
             var loadData = Files.readAllLines(Path.of(filePath)).stream()
@@ -109,7 +107,7 @@ public class Main {
 
     private static Integer process() {
         // Specify the file path
-        String filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day2/input-task.txt";
+        String filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day.day2/input-task.txt";
 
         try {
             var loadData = Files.readAllLines(Path.of(filePath)).stream()
