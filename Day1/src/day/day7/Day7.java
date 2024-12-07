@@ -11,6 +11,16 @@ public class Day7 extends Day {
     @Override
     public Long taskOne(String filePath) {
 
+        return verifyCalculation(filePath, new char[]{'+', '*'});
+    }
+
+    @Override
+    public Long taskTwo(String filePath) {
+
+        return verifyCalculation(filePath, new char[]{'+', '*', '|'});
+    }
+
+    private static long verifyCalculation(String filePath, char[] x) {
         try {
             var correctData = 0L;
             var allLines = Files.readAllLines(Paths.get(filePath));
@@ -21,24 +31,8 @@ public class Day7 extends Day {
                         .map(Long::parseLong)
                         .toArray(Long[]::new);
 
-                var permutations = generatePermutations(operations.length - 1);
-
-                for (int i = 0; i < permutations.length; i++) {
-                    var actualResult = operations[0];
-                    for (int j = 0; j < permutations[i].length; j++) {
-                        var nextNumber = operations[j + 1];
-                        if (permutations[i][j] == '+') {
-                            actualResult += nextNumber;
-                        }
-                        if (permutations[i][j] == '*') {
-                            actualResult *= nextNumber;
-                        }
-                    }
-                    if (actualResult == expectedResult) {
-                        correctData += expectedResult;
-                        break;
-                    }
-                }
+                var permutations = generatePermutations(operations.length - 1, x);
+                correctData = processSingleValidation(permutations, operations, expectedResult, correctData);
             }
             return correctData;
         } catch (IOException e) {
@@ -47,25 +41,53 @@ public class Day7 extends Day {
         }
     }
 
-    @Override
-    public Long taskTwo(String filePath) {
-        return 0L;
+    private static long processSingleValidation(char[][] permutations, Long[] operations, long expectedResult, long correctData) {
+        for (char[] permutation : permutations) {
+            var actualResult = operations[0];
+            for (int j = 0; j < permutation.length; j++) {
+                var nextNumber = operations[j + 1];
+                actualResult = doOperation(permutation[j], actualResult, nextNumber);
+            }
+            if (actualResult == expectedResult) {
+                correctData += expectedResult;
+                break;
+            }
+        }
+        return correctData;
     }
 
-    public static char[][] generatePermutations(int n) {
-        // Total number of permutations is 2^n
-        int totalPermutations = (int) Math.pow(2, n);
-        char[][] result = new char[totalPermutations][n];  // 2^n permutations, each of length n
+    private static Long doOperation(char operation, Long actualResult, Long nextNumber) {
+        switch (operation) {
+            case '+':
+                actualResult += nextNumber;
+                break;
+            case '*':
+                actualResult *= nextNumber;
+                break;
+            case '|':
+                actualResult = Long.parseLong(String.valueOf(actualResult) + nextNumber);
+                break;
+            default:
+                System.out.println("Invalid operation: " + operation);
+        }
+        return actualResult;
+    }
 
-        // Generate permutations
+    public static char[][] generatePermutations(int n, char[] operators) {
+        var operatorsCount = operators.length;
+        if (operatorsCount < 2) {
+            throw new IllegalArgumentException("Number of operators (k) must be at least 2");
+        }
+
+        int totalPermutations = (int) Math.pow(operatorsCount, n);
+        char[][] result = new char[totalPermutations][n];
+
         for (int i = 0; i < totalPermutations; i++) {
+            int current = i;
             for (int j = 0; j < n; j++) {
-                // Using bitwise operation to decide whether it's '+' or '*'
-                if ((i & (1 << (n - j - 1))) != 0) {
-                    result[i][j] = '*';
-                } else {
-                    result[i][j] = '+';
-                }
+                int operatorIndex = current % operatorsCount;
+                result[i][j] = operators[operatorIndex];
+                current /= operatorsCount;
             }
         }
 
