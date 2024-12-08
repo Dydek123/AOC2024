@@ -10,24 +10,24 @@ public abstract class Day {
     }
 
     public void runAllTest() {
-        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day7/input-test.txt";
+        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day8/input-test.txt";
         processTask(() -> taskOne(filePath), 1);
         processTask(() -> taskTwo(filePath), 2);
     }
 
     public void runAllTask() {
-        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day7/input-task.txt";
+        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day8/input-task.txt";
         processTask(() -> taskOne(filePath), 1);
         processTask(() -> taskTwo(filePath), 2);
     }
 
     public void runFirstTask() {
-        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day7/input-task.txt";
+        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day8/input-task.txt";
         processTask(() -> taskOne(filePath), 1);
     }
 
     public void runSecondTask() {
-        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day7/input-task.txt";
+        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day8/input-task.txt";
         processTask(() -> taskTwo(filePath), 2);
     }
 
