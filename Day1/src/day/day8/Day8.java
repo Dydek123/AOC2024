@@ -7,103 +7,93 @@ import java.util.*;
 
 public class Day8 extends Day {
 
+    public static final char EMPTY_FIELD = '.';
+
     @Override
     public Long taskOne(String filePath) {
         Set<Long> uniquePositions = new HashSet<>();
-        var grid = DayUtils.readGridFromFile(filePath);
+        char[][] grid = DayUtils.readGridFromFile(filePath);
 
-        var occurenciesMap = getOccurenciesMap(grid);
+        var occurrencesMap = buildOccurrencesMap(grid);
 
-
-        for (var entry : occurenciesMap.entrySet()) {
-            for (int i = 0; i < entry.getValue().size() - 1; i++) {
-                for (int j = i + 1; j < entry.getValue().size(); j++) {
-                    setSingleAntinode(new int[]{entry.getValue().get(i).get(0), entry.getValue().get(i).get(1)}, new int[]{entry.getValue().get(j).get(0), entry.getValue().get(j).get(1)}, grid, uniquePositions);
-                }
-            }
+        for (var entry : occurrencesMap.values()) {
+            addUniquePositions(entry, grid, uniquePositions, false);
         }
+
         return (long) uniquePositions.size();
-    }
-
-    private static HashMap<String, List<List<Integer>>> getOccurenciesMap(char[][] grid) {
-        var occurenciesMap = new HashMap<String, List<List<Integer>>>();
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid[i].length; j++) {
-                if (grid[i][j] != '.') {
-                    occurenciesMap.putIfAbsent(String.valueOf(grid[i][j]), new ArrayList<>());
-                    occurenciesMap.get(String.valueOf(grid[i][j])).add(List.of(i, j));
-                }
-            }
-        }
-        return occurenciesMap;
     }
 
     @Override
     public Long taskTwo(String filePath) {
         Set<Long> uniquePositions = new HashSet<>();
-        var grid = DayUtils.readGridFromFile(filePath);
+        char[][] grid = DayUtils.readGridFromFile(filePath);
 
-        var occurenciesMap = getOccurenciesMap(grid);
+        var occurrencesMap = buildOccurrencesMap(grid);
 
-        for (var entry : occurenciesMap.entrySet()) {
-            if (entry.getValue().size() > 1) {
-                for (int i = 0; i < entry.getValue().size(); i++) {
-                    uniquePositions.add(entry.getValue().get(i).get(0) * 1000L + entry.getValue().get(i).get(1));
+        for (var entry : occurrencesMap.values()) {
+            if (entry.size() > 1) {
+                for (var pos : entry) {
+                    uniquePositions.add(hashPosition(pos));
                 }
             }
-            for (int i = 0; i < entry.getValue().size() - 1; i++) {
-                for (int j = i + 1; j < entry.getValue().size(); j++) {
-                    setAntinodeInLoop(new int[]{entry.getValue().get(i).get(0), entry.getValue().get(i).get(1)}, new int[]{entry.getValue().get(j).get(0), entry.getValue().get(j).get(1)}, grid, uniquePositions);
-                }
-            }
+            addUniquePositions(entry, grid, uniquePositions, true);
         }
+
         return (long) uniquePositions.size();
     }
 
-    private static void setSingleAntinode(int[] start, int[] end, char[][] grid, Set<Long> uniquePositions) {
-        int[] distance = calculateDistance(start, end);
-        try {
-            searchSingleAntinode(end, grid, uniquePositions, distance);
-            var negatedDistance = new int[]{-distance[0], -distance[1]};
-            searchSingleAntinode(start, grid, uniquePositions, negatedDistance);
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("Unexpected out of bounds exception");
+    private static Map<Character, List<int[]>> buildOccurrencesMap(char[][] grid) {
+        Map<Character, List<int[]>> occurrencesMap = new HashMap<>();
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[i].length; j++) {
+                char ch = grid[i][j];
+                if (ch != EMPTY_FIELD) {
+                    occurrencesMap.computeIfAbsent(ch, k -> new ArrayList<>()).add(new int[]{i, j});
+                }
+            }
+        }
+        return occurrencesMap;
+    }
+
+    private static void addUniquePositions(List<int[]> positions, char[][] grid, Set<Long> uniquePositions, boolean includeMultipleOccurrences) {
+        for (int i = 0; i < positions.size() - 1; i++) {
+            for (int j = i + 1; j < positions.size(); j++) {
+                int[] start = positions.get(i);
+                int[] end = positions.get(j);
+                int[] distance = calculateDistance(start, end);
+
+                addAntinode(start, distance, grid, uniquePositions, includeMultipleOccurrences);
+                addAntinode(end, negateDistance(distance), grid, uniquePositions, includeMultipleOccurrences);
+            }
         }
     }
 
-    private static void searchSingleAntinode(int[] end, char[][] grid, Set<Long> uniquePositions, int[] distance) {
-        if (end[0] + distance[0] < grid.length && end[0] + distance[0] >= 0 && end[1] + distance[1] < grid.length && end[1] + distance[1] >= 0) {
-            long a = (end[0] + distance[0]) * 1000L;
-            long b = end[1] + distance[1];
-            uniquePositions.add(a + b);
+    private static void addAntinode(int[] position, int[] distance, char[][] grid, Set<Long> uniquePositions, boolean includeMultipleOccurrences) {
+        int x = position[0] + distance[0];
+        int y = position[1] + distance[1];
+
+        while (isValidPosition(x, y, grid)) {
+            uniquePositions.add(hashPosition(new int[]{x, y}));
+            if (!includeMultipleOccurrences) break;
+
+            x += distance[0];
+            y += distance[1];
         }
     }
 
-    private static void setAntinodeInLoop(int[] start, int[] end, char[][] grid, Set<Long> uniquePositions) {
-        int[] distance = calculateDistance(start, end);
-        try {
-            searchAntinodes(end, grid, uniquePositions, distance);
-            var negatedDistance = new int[]{-distance[0], -distance[1]};
-            searchAntinodes(start, grid, uniquePositions, negatedDistance);
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("Unexpected out of bounds exception");
-        }
+    private static boolean isValidPosition(int x, int y, char[][] grid) {
+        return x >= 0 && x < grid.length && y >= 0 && y < grid[0].length;
     }
 
-    private static void searchAntinodes(int[] startPosition, char[][] grid, Set<Long> uniquePositions, int[] distance) {
-        var moveX = distance[0];
-        var moveY = distance[1];
-        while (startPosition[0] + moveX < grid.length && startPosition[0] + moveX >= 0 && startPosition[1] + moveY < grid.length && startPosition[1] + moveY >= 0) {
-            long a = (startPosition[0] + moveX) * 1000L;
-            long b = startPosition[1] + moveY;
-            uniquePositions.add(a + b);
-
-            moveX += distance[0];
-            moveY += distance[1];
-        }
+    private static long hashPosition(int[] position) {
+        return position[0] * 1000L + position[1];
     }
 
     private static int[] calculateDistance(int[] start, int[] end) {
         return new int[]{end[0] - start[0], end[1] - start[1]};
+    }
+
+    private static int[] negateDistance(int[] distance) {
+        return new int[]{-distance[0], -distance[1]};
     }
 }
