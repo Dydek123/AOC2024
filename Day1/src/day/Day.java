@@ -1,8 +1,12 @@
 package day;
 
-import java.io.IOException;
-
 public abstract class Day {
+
+    private String dayName;
+
+    public void setDayName(String dayName) {
+        this.dayName = dayName;
+    }
 
     @FunctionalInterface
     public interface Operation {
@@ -10,24 +14,24 @@ public abstract class Day {
     }
 
     public void runAllTest() {
-        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day8/input-test.txt";
+        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day" + dayName + "/input-test.txt";
         processTask(() -> taskOne(filePath), 1);
         processTask(() -> taskTwo(filePath), 2);
     }
 
     public void runAllTask() {
-        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day8/input-task.txt";
+        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day" + dayName + "/input-task.txt";
         processTask(() -> taskOne(filePath), 1);
         processTask(() -> taskTwo(filePath), 2);
     }
 
     public void runFirstTask() {
-        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day8/input-task.txt";
+        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day" + dayName + "/input-task.txt";
         processTask(() -> taskOne(filePath), 1);
     }
 
     public void runSecondTask() {
-        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day8/input-task.txt";
+        var filePath = "/home/vboxuser/Desktop/AOC2024/Day1/src/day/day" + dayName + "/input-task.txt";
         processTask(() -> taskTwo(filePath), 2);
     }
 
