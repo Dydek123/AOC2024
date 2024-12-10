@@ -3,12 +3,14 @@ package day.day10;
 import day.Day;
 import day.DayUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class Day10 extends Day {
-
-    long result1 = 0;
-    Map<Long, Set<Long>> trailHeads = new HashMap<>();
+    int[] dRow = {-1, 0, 1, 0};
+    int[] dCol = {0, 1, 0, -1};
 
     public Day10() {
         setDayName("10");
@@ -16,98 +18,73 @@ public class Day10 extends Day {
 
     @Override
     public Long taskOne(String filePath) {
-        trailHeads.clear();
+        Map<Long, Set<Long>> trailHeads = new HashMap<>();
         var data = DayUtils.readGridFromFileAsNumbers(filePath);
         for (int i = 0; i < data.length; i++) {
             for (int j = 0; j < data[i].length; j++) {
                 if (data[i][j] == 0) {
-                    findTrail(data, 0, i, j, i * 1000L + j, new HashSet<>());
+                    countUniqueTrailsToTop(data, 0, i, j, hashPosition(i, j), trailHeads);
                 }
             }
         }
         return trailHeads.values().stream().mapToLong(Set::size).sum();
     }
 
-    private void findTrail(int[][] data, int currentHeight, int i, int j, long startPosition, Set<Long> visited) {
-        long position = i * 1000L + j;
-
-        if (visited.contains(position)) {
-            return;
-        }
-        visited.add(position);
-
-        if (currentHeight == 9) {
-            trailHeads.computeIfAbsent(startPosition, k -> new HashSet<>()).add(position);
-            return;
-        }
-
-        //UP
-        if (i - 1 >= 0 && data[i - 1][j] == currentHeight + 1) {
-            findTrail(data, currentHeight + 1, i - 1, j, startPosition, visited);
-        }
-
-        //RIGHT
-        if (j + 1 < data[i].length && data[i][j + 1] == currentHeight + 1) {
-            findTrail(data, currentHeight + 1, i, j + 1, startPosition, visited);
-        }
-
-        //DOWN
-        if (i + 1 < data.length && data[i + 1][j] == currentHeight + 1) {
-            findTrail(data, currentHeight + 1, i + 1, j, startPosition, visited);
-        }
-
-        //LEFT
-        if (j - 1 >= 0 && data[i][j - 1] == currentHeight + 1) {
-            findTrail(data, currentHeight + 1, i, j - 1, startPosition, visited);
-        }
-
-        return;
-    }
-
-    private void findTrail2(int[][] data, int currentHeight, int i, int j) {
-        if (currentHeight == 9) {
-            result1++;
-            return;
-        }
-        //UP
-        if (i - 1 >= 0 && data[i - 1][j] == currentHeight + 1) {
-            findTrail2(data, currentHeight + 1, i - 1, j);
-        }
-
-        //RIGHT
-        if (j + 1 < data.length && data[i][j + 1] == currentHeight + 1) {
-            findTrail2(data, currentHeight + 1, i, j + 1);
-        }
-
-        //DOWN
-        if (i + 1 < data.length && data[i + 1][j] == currentHeight + 1) {
-            findTrail2(data, currentHeight + 1, i + 1, j);
-        }
-
-        //LEFT
-        if (j - 1 >= 0 && data[i][j - 1] == currentHeight + 1) {
-            findTrail2(data, currentHeight + 1, i, j - 1);
-        }
-
-        return;
-    }
-
     @Override
     public Long taskTwo(String filePath) {
-        trailHeads.clear();
-        result1 = 0;
         var data = DayUtils.readGridFromFileAsNumbers(filePath);
+        var result = 0L;
         for (int i = 0; i < data.length; i++) {
             for (int j = 0; j < data[i].length; j++) {
                 if (data[i][j] == 0) {
-                    findTrail2(data, 0, i, j);
+                    result += countAllTrailsToTop(data, 0, i, j);
                 }
             }
         }
-        return result1;
+        return result;
+    }
+
+    private void countUniqueTrailsToTop(int[][] data, int currentHeight, int i, int j, long startPosition, Map<Long, Set<Long>> trailHeads) {
+        if (currentHeight == 9) {
+            trailHeads.computeIfAbsent(startPosition, _ -> new HashSet<>()).add(hashPosition(i, j));
+            return;
+        }
+
+        for (int dir = 0; dir < 4; dir++) {
+            int newRow = i + dRow[dir];
+            int newCol = j + dCol[dir];
+            if (isWithinBounds(newRow, newCol, data) && data[newRow][newCol] == currentHeight + 1) {
+                countUniqueTrailsToTop(data, currentHeight + 1, newRow, newCol, startPosition, trailHeads);
+            }
+        }
+    }
+
+    private long hashPosition(int i, int j) {
+        return i * 1000L + j;
+    }
+
+    private boolean isWithinBounds(int newRow, int newCol, int[][] data) {
+        return newRow >= 0 && newRow < data.length && newCol >= 0 && newCol < data[newRow].length;
+    }
+
+    private long countAllTrailsToTop(int[][] data, int currentHeight, int i, int j) {
+        var result = 0L;
+        if (currentHeight == 9) {
+            return 1;
+        }
+
+        for (int dir = 0; dir < 4; dir++) {
+            int newRow = i + dRow[dir];
+            int newCol = j + dCol[dir];
+            if (isWithinBounds(newRow, newCol, data) && data[newRow][newCol] == currentHeight + 1) {
+                result += countAllTrailsToTop(data, currentHeight + 1, newRow, newCol);
+            }
+        }
+        return result;
     }
 }
 
+//TODO add Tests
 
 //Should return 5
 //0190999
@@ -138,3 +115,5 @@ public class Day10 extends Day {
 //10456732
 
 //TASK SHOULD RETURN 794
+
+//TASK 2 SHOULD RETURN 1706
