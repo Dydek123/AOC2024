@@ -7,145 +7,101 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class Day13 extends Day {
+
+    private static final Pattern GET_VALUES_PATTERN = Pattern.compile("X[+=](\\d+), Y[+=](\\d+)");
+    private static final BigDecimal PRIZE_INCREMENT = new BigDecimal(10000000000000L);
+    public static final int MULTIPLIER_X_PRESSES = 3;
+
     public Day13() {
         setDayName("13");
     }
 
     @Override
-    public Long taskTwo(String filePath) {
-        var result = 0L;
+    public Long taskOne(String filePath) {
         try {
-            var xQuery= new BigDecimal[]{new BigDecimal(0), new BigDecimal(0), new BigDecimal(0)};;
-            var yQuery= new BigDecimal[]{new BigDecimal(0), new BigDecimal(0), new BigDecimal(0)};;
-            var lines = Files.readAllLines(Path.of(filePath));
-            for (int i = 0; i < lines.size(); i++) {
-                var query = findPosition(lines.get(i));
-                switch (i % 4) {
-                    case 0:
-                        xQuery[0] = new BigDecimal(query[0]);
-                        yQuery[0] = new BigDecimal(query[1]);
-                        break;
-                    case 1:
-                        xQuery[1] = new BigDecimal(query[0]);
-                        yQuery[1] = new BigDecimal(query[1]);
-                        break;
-                    case 2:
-                        xQuery[2] = new BigDecimal(query[0] + 10000000000000L);
-                        yQuery[2] = new BigDecimal(query[1] + 10000000000000L);
-                        result += calculate(xQuery, yQuery);
-                        break;
-                    default:
-                        break;
-                }
-            }
+            return calculatePresses(filePath, false);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Long taskTwo(String filePath) {
+        try {
+            return calculatePresses(filePath, true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private long calculatePresses(String filePath, boolean increasePrize) throws IOException {
+        var result = 0L;
+        var xQuery = getArrayWithDefaultValues();
+        var yQuery = getArrayWithDefaultValues();
+        var lines = Files.readAllLines(Path.of(filePath));
+        for (int i = 0; i < lines.size(); i++) {
+            var query = getPairValues(lines.get(i));
+            switch (i % 4) {
+                case 0:
+                    xQuery[0] = query[0];
+                    yQuery[0] = query[1];
+                    break;
+                case 1:
+                    xQuery[1] = query[0];
+                    yQuery[1] = query[1];
+                    break;
+                case 2:
+                    if (increasePrize) {
+                        xQuery[2] = query[0].add(PRIZE_INCREMENT);
+                        yQuery[2] = query[1].add(PRIZE_INCREMENT);
+                    } else {
+                        xQuery[2] = query[0];
+                        yQuery[2] = query[1];
+                    }
+                    result += resolveEquation(xQuery, yQuery);
+                    break;
+                default:
+                    break;
+            }
         }
         return result;
     }
 
-    @Override
-    public Long taskOne(String filePath) {
-        return 0L;
-//        var result = 0L;
-//        try {
-//            var xQuery = new long[]{0, 0, 0};
-//            var yQuery = new long[]{0, 0, 0};
-//            var lines = Files.readAllLines(Path.of(filePath));
-//            for (int i = 0; i < lines.size(); i++) {
-//                var query = findPosition(lines.get(i));
-//                switch (i % 4) {
-//                    case 0:
-//                        xQuery[0] = query[0];
-//                        yQuery[0] = query[1];
-//                        break;
-//                    case 1:
-//                        xQuery[1] = query[0];
-//                        yQuery[1] = query[1];
-//                        break;
-//                    case 2:
-//                        xQuery[2] = query[0];
-//                        yQuery[2] = query[1];
-//                        result += calculate(xQuery, yQuery);
-//                        break;
-//                    default:
-//                        break;
-//                }
-//            }
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//        return result;
+    private BigDecimal[] getArrayWithDefaultValues() {
+        return new BigDecimal[]{new BigDecimal(0), new BigDecimal(0), new BigDecimal(0)};
     }
 
-    private long calculate(long[] xQuery, long[] yQuery) {
-        // Calculate determinant
-        var det = xQuery[0] * yQuery[1] - xQuery[1] * yQuery[0];
-        System.out.println("Calculate query: " + Arrays.toString(xQuery) + ", " + Arrays.toString(yQuery) + ", det=" + det);
-
-        if (det == 0) {
-            return 0;
-        }
-
-        // Use floating-point division to compute x and y
-        var x = (double) (xQuery[2] * yQuery[1] - yQuery[2] * xQuery[1]) / det;
-        var y = (double) (xQuery[0] * yQuery[2] - yQuery[0] * xQuery[2]) / det;
-
-        // Convert results to long if needed (rounding to nearest integer)
-        long xRounded = Math.round(x);
-        long yRounded = Math.round(y);
-
-        System.out.println("xRounded=" + xRounded + ", yRounded=" + yRounded + ", x=" + x + ", y=" + y);
-        // Compute the result
-        if ((double) xRounded == x && (double) yRounded == y && x <= 100 && y <= 100) {
-            System.out.println("Result: " + xRounded + "," + yRounded + " = " + 3 * xRounded + yRounded);
-            return 3 * xRounded + yRounded;
-        }
-        System.out.println("No sulution");
-        return 0L;
-    }
-
-    private Long calculate(BigDecimal[] xQuery, BigDecimal[] yQuery) {
-        BigDecimal det = xQuery[0].multiply(yQuery[1]).subtract(xQuery[1].multiply(yQuery[0]));
-        System.out.println("Determinant: " + det);
+    private Long resolveEquation(BigDecimal[] xQuery, BigDecimal[] yQuery) {
+        var det = xQuery[0].multiply(yQuery[1]).subtract(xQuery[1].multiply(yQuery[0]));
 
         if (det.compareTo(BigDecimal.ZERO) == 0) {
             return 0L;
         }
 
-
-        // Calculate x and y
-        var xUp = xQuery[2].multiply(yQuery[1]).subtract(yQuery[2].multiply(xQuery[1]));
-        var yUp = xQuery[0].multiply(yQuery[2]).subtract(yQuery[0].multiply(xQuery[2]));
-        if (xUp.remainder(det).compareTo(BigDecimal.ZERO) != 0 || yUp.remainder(det).compareTo(BigDecimal.ZERO) != 0) {
+        var xNumerator = xQuery[2].multiply(yQuery[1]).subtract(yQuery[2].multiply(xQuery[1]));
+        var yNumerator = xQuery[0].multiply(yQuery[2]).subtract(yQuery[0].multiply(xQuery[2]));
+        if (isDecimalSolution(xNumerator, det, yNumerator)) {
             return 0L;
         }
-        BigDecimal x = (xUp).divide(det, RoundingMode.HALF_UP);
-        BigDecimal y = yUp.divide(det, RoundingMode.HALF_UP);
+        var x = (xNumerator).divide(det, RoundingMode.HALF_UP);
+        var y = yNumerator.divide(det, RoundingMode.HALF_UP);
+        return Long.parseLong(x.multiply(new BigDecimal(MULTIPLIER_X_PRESSES)).add(y).toString());
+    }
 
-        // Check if x and y are exact integers
-        if (x.stripTrailingZeros().scale() > 0 || y.stripTrailingZeros().scale() > 0) {
-            // Either x or y is not an integer
-            System.out.println("No integer solutions found.");
-            return 0L;
-        }
-        // Print the results for debugging
-        System.out.println("x = " + x + ", y = " + y);
-        return Long.parseLong(x.multiply(new BigDecimal(3)).add(y).toString());
+    private boolean isDecimalSolution(BigDecimal xNumerator, BigDecimal det, BigDecimal yNumerator) {
+        return xNumerator.remainder(det).compareTo(BigDecimal.ZERO) != 0 || yNumerator.remainder(det).compareTo(BigDecimal.ZERO) != 0;
     }
 
 
-    private static long[] findPosition(String line) {
-        var MULTIPLICATION_PATTERN = Pattern.compile("X[+=](\\d+), Y[+=](\\d+)");
-        var matcher = MULTIPLICATION_PATTERN.matcher(line);
-
-        while (matcher.find()) {
-            return new long[]{Long.parseLong(matcher.group(1)), Long.parseLong(matcher.group(2))};
+    private BigDecimal[] getPairValues(String line) {
+        var matcher = GET_VALUES_PATTERN.matcher(line);
+        if (matcher.find()) {
+            return new BigDecimal[]{new BigDecimal(matcher.group(1)), new BigDecimal(matcher.group(2))};
         }
-        return new long[]{0, 0};
+        return new BigDecimal[]{new BigDecimal(0), new BigDecimal(0)};
     }
 }
+//TODO ADD TESTS
