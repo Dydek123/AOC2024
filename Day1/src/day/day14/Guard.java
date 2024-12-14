@@ -6,9 +6,6 @@ public class Guard {
     private int velocityX;
     private int velocityY;
 
-    public Guard() {
-    }
-
     public Guard(int posX, int posY, int velocityX, int velocityY) {
         this.posX = posX;
         this.posY = posY;

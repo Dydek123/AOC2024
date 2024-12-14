@@ -24,14 +24,9 @@ public class Day14 extends Day {
         var iterations = 100;
         var boardRecord = determineBoardSize(filePath);
         var guards = parseGuards(filePath);
-        char[][] board = new char[boardRecord.sizeY()][boardRecord.sizeX()];
-        setDefaultBoardValues(board);
-
         for (int i = 0; i < iterations; i++) {
             moveGuards(guards, boardRecord.sizeX(), boardRecord.sizeY());
-            setGuardPositionOnBoard(guards, board);
         }
-
         return calculateResult(guards, boardRecord.sizeX(), boardRecord.sizeY());
     }
 
@@ -122,10 +117,22 @@ public class Day14 extends Day {
         var halfX = boardSizeX / 2;
         var halfY = boardSizeY / 2;
 
-        var topLeft = guards.stream().filter(g -> g.getPosX() < halfX && g.getPosY() < halfY).count();
-        var topRight = guards.stream().filter(g -> g.getPosX() > halfX && g.getPosY() < halfY).count();
-        var bottomLeft = guards.stream().filter(g -> g.getPosX() < halfX && g.getPosY() > halfY).count();
-        var bottomRight = guards.stream().filter(g -> g.getPosX() > halfX && g.getPosY() > halfY).count();
+        long topLeft = 0, topRight = 0, bottomLeft = 0, bottomRight = 0;
+
+        for (Guard guard : guards) {
+            int x = guard.getPosX();
+            int y = guard.getPosY();
+
+            if (x < halfX && y < halfY) {
+                topLeft++;
+            } else if (x > halfX && y < halfY) {
+                topRight++;
+            } else if (x < halfX && y > halfY) {
+                bottomLeft++;
+            } else if (x > halfX && y > halfY) {
+                bottomRight++;
+            }
+        }
 
         return topLeft * topRight * bottomLeft * bottomRight;
     }
